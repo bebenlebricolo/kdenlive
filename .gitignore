@@ -12,6 +12,8 @@ packaging/flatpak/.flatpak-builder
 
 # Jetbrains IDE like CLion
 .idea
+.vs
+.vscode
 
 # clangd tooling
 .cache

@@ -84,17 +84,31 @@ private:
     /** @brief Check if the producer has an id. If not (should not happen, but...) try to recover it
      *  @returns true if the producer has been changed (id recovered), false if it was either already okay or could not be recovered
      */
-    bool ensureProducerHasId(QDomElement &producer, const QDomNodeList &entries);
-    /** @brief Check if the producer represents an "invalid" placeholder (project saved with missing source). If such a placeholder is detected, it tries to
-     * recover the original clip.
-     *  @returns true if the producer has been changed (recovered), false if it was either already okay or could not be recovered
-     */
-    bool ensureProducerIsNotPlaceholder(QDomElement &producer);
+    bool checkAndRepairProducerId(QDomElement &producer, const QDomNodeList &entries);
 
-    /** @brief Check for various missing elements */
-    QString getMissingProducers(QDomElement &e, const QDomNodeList &entries, const QString &storageFolder);
-    /** @brief Check if images and fonts in this clip exists, returns a list of images that do exist so we don't check twice. */
+    /** @brief Check if the producer represents an "invalid" placeholder (project saved with missing source).
+     * If such a placeholder is detected, it tries to recover the original clip.
+     *  @returns true if the placeholder has been changed (recovered), false if it was either already okay or could not be recovered
+     */
+    bool fixInvalidPlaceholderProducer(QDomElement &producer);
+
+    /**
+     * @brief Check for various missing elements.
+     * Used while ensuring the kdocument is sound and all its pointed resources are reachable, valid and unmodified.
+     *
+     * @param e             : Input XML Dom Element
+     * @param entries       : Xml Nodes to check
+     * @param storageFolder : Local folder where the document is located
+     * @return the name of the producer which has been checked and validated (ok, or correctly repaired / recovered), or QString() in case it failed to retrieve
+     * a valid element.
+     */
+    QString collectValidProducers(QDomElement &e, const QDomNodeList &entries, const QString &storageFolder);
+
+    /** @brief Check if images and fonts in this clip exists, returns a list of images that do exist so we don't check twice.
+     * TODO : Update documentation
+     */
     void checkMissingImagesAndFonts(const QStringList &images, const QStringList &fonts, const QString &id);
+
     /** @brief If project path changed, try to relocate its resources */
     const QString relocateResource(QString sourceResource);
 
@@ -115,7 +129,14 @@ private:
                         const QDomNodeList &filters);
 
     bool itemsContain(MissingType type, const QString &path = QString(), MissingStatus status = MissingStatus::Missing);
-    int itemIndexByClipId(const QString &clipId);
+
+    /**
+     * @brief Retrieves internal clip index based on clip's unique identifier.
+     *
+     * @param clipId    : Clip's unique identifier
+     * @return uint64_t : index of the targeted clip in memory, or UINT64_MAX if not found.
+     */
+    uint64_t itemIndexByClipId(const QString &clipId);
 
     void fixTitleImage(QDomElement &e, const QString &oldPath, const QString &newPath);
     void fixTitleFont(const QDomNodeList &producers, const QString &oldFont, const QString &newFont);
@@ -131,4 +152,15 @@ private:
     void fixMissingSource(const QString &id, const QDomNodeList &producers, const QDomNodeList &chains);
 
     QStringList fixSequences(QDomElement &e, const QDomNodeList &producers, const QStringList &tractorIds);
+
+    /**
+     * @brief
+     *
+     * @param e             : Dom Element used as a metadata source of truth
+     * @param resource      : Resource to check in the dom element
+     * @param clipId        : Clip unique identifier
+     * @param clipType      : Clip type
+     * @param isBinClip     : This clip has an Id property (...)
+     */
+    void checkClip(QDomElement &e, const QString &resource, QString clipId, ClipType::ProducerType clipType, bool isBinClip);
 };

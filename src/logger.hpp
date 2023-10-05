@@ -32,21 +32,29 @@ public:
     static void init();
 
     /** @brief Notify the logger that the current thread wants to start logging.
-     * This function returns true if this is a top-level call, meaning that we indeed want to log it. If the function returns false, the  caller must not log.
+     * This function returns true if this is a top-level call, meaning that we indeed want to log it.
+     * If the function returns false, the  caller must not log.
      */
     static bool start_logging();
 
-    /** @brief This logs the construction of an object of type T, whose new instance is passed. The instance will be kept around in case future calls refer to
-     * it. The arguments should more or less match the constructor arguments. In general, it's better to call the corresponding macro TRACE_CONSTR */
+    /** @brief This logs the construction of an object of type T, whose new instance is passed.
+     * The instance will be kept around in case future calls refer to it.
+     * The arguments should more or less match the constructor arguments.
+     * In general, it's better to call the corresponding macro TRACE_CONSTR
+     */
     template <typename T> static void log_constr(T *inst, std::vector<rttr::variant> args);
 
-    /** @brief Logs the call to a member function on a given instance of class T. The string contains the method name, and then the vector contains all the
-     * parameters. In general, the method should be registered in RTTR. It's better to call the corresponding macro TRACE() if appropriate */
+    /** @brief Logs the call to a member function on a given instance of class T.
+     * The string contains the method name, and then the vector contains all the parameters.
+     * In general, the method should be registered in RTTR.
+     * It's better to call the corresponding macro TRACE() if appropriate
+     */
     template <typename T> static void log(T *inst, std::string str, std::vector<rttr::variant> args);
     static void log_create_producer(const std::string &type, std::vector<rttr::variant> args);
 
-    /** @brief When the last function logged has a return value, you can log it through this function, by passing the corresponding value. In general, it's
-     * better to call the macro TRACE_RES */
+    /** @brief When the last function logged has a return value, you can log it through this function, by passing the corresponding value.
+     * In general, it's better to call the macro TRACE_RES
+     */
     static void log_res(rttr::variant result);
 
     // log whenever an undo/redo occurred
