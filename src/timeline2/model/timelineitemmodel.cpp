@@ -17,6 +17,7 @@
 #include "kdenlivesettings.h"
 #include "macros.hpp"
 #include "snapmodel.hpp"
+#include "stopwatchmonitor.h"
 #include "timeline2/view/previewmanager.h"
 #include "trackmodel.hpp"
 #include "transitions/transitionsrepository.hpp"
@@ -730,6 +731,10 @@ void TimelineItemModel::buildTrackCompositing(bool rebuild)
     if (hasMixer) {
         pCore->mixer()->cleanup();
     }
+
+    DECL_STOPWATCH(start);
+    STOPWATCH_TIME_NOW(start);
+    LOG("Updating tracks")
     int videoTracks = 0;
     int audioTracks = 0;
     while (it != m_allTracks.cend()) {
@@ -776,6 +781,7 @@ void TimelineItemModel::buildTrackCompositing(bool rebuild)
     if (composite.isEmpty()) {
         pCore->displayMessage(i18n("Could not setup track compositing, check your install"), MessageType::ErrorMessage);
     }
+    LOG_DURATION_NOW(start);
 }
 
 void TimelineItemModel::notifyChange(const QModelIndex &topleft, const QModelIndex &bottomright, int role)

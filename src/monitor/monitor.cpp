@@ -1832,7 +1832,7 @@ void Monitor::slotOpenClip(const std::shared_ptr<ProjectClip> &controller, int i
             m_timePos->setRange(0, int(m_controller->frameDuration() - 1));
             m_glMonitor->setRulerInfo(int(m_controller->frameDuration() - 1), controller->getFilteredMarkerModel());
             double audioScale = m_controller->getProducerDoubleProperty(QStringLiteral("kdenlive:thumbZoomFactor"));
-            if (in == out == -1) {
+            if ((in == out) && (in == -1)) {
                 // Only apply on bin clip, not sub clips
                 int lastPosition = m_controller->getProducerIntProperty(QStringLiteral("kdenlive:monitorPosition"));
                 if (lastPosition > 0 && lastPosition != m_controller->originalProducer()->position()) {

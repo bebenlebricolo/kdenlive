@@ -19,6 +19,8 @@
 #include <QCryptographicHash>
 #include <QStandardPaths>
 
+#include "stopwatchmonitor.h"
+
 QDebug operator<<(QDebug qd, const DocumentChecker::DocumentResource &item)
 {
     qd << "Type:" << DocumentChecker::readableNameForMissingType(item.type);
@@ -132,6 +134,9 @@ bool DocumentChecker::resolveProblemsWithGUI()
 bool DocumentChecker::hasErrorInProject()
 {
     m_items.clear();
+    DECL_STOPWATCH(start);
+    STOPWATCH_TIME_NOW(start);
+    LOG("Starting project checking process - Playlist checks");
 
     QString storageFolder;
     QDir projectDir(m_url.adjusted(QUrl::RemoveFilename).toLocalFile());
@@ -169,6 +174,7 @@ bool DocumentChecker::hasErrorInProject()
             break;
         }
     }
+    LOG_DURATION_NOW(start);
 
     QDomNodeList documentProducers = m_doc.elementsByTagName(QStringLiteral("producer"));
     QDomNodeList documentChains = m_doc.elementsByTagName(QStringLiteral("chain"));
@@ -178,17 +184,27 @@ bool DocumentChecker::hasErrorInProject()
     m_safeFonts.clear();
 
     QStringList verifiedPaths;
+
+    STOPWATCH_TIME_NOW(start);
+    LOG("Validating document producers");
     int max = documentProducers.count();
     for (int i = 0; i < max; ++i) {
         QDomElement e = documentProducers.item(i).toElement();
         verifiedPaths << collectValidProducers(e, entries, storageFolder);
     }
+    LOG_DURATION_NOW(start);
+
+    STOPWATCH_TIME_NOW(start);
+    LOG("Validating document chains");
     max = documentChains.count();
     for (int i = 0; i < max; ++i) {
         QDomElement e = documentChains.item(i).toElement();
         verifiedPaths << collectValidProducers(e, entries, storageFolder);
     }
+    LOG_DURATION_NOW(start);
 
+    STOPWATCH_TIME_NOW(start);
+    LOG("Checking luma files");
     // Check existence of luma files
     QStringList filesToCheck = getAssetsFiles(m_doc, QStringLiteral("transition"), getLumaPairs());
     for (const QString &lumafile : qAsConst(filesToCheck)) {
@@ -241,7 +257,10 @@ bool DocumentChecker::hasErrorInProject()
             m_items.push_back(item);
         }
     }
+    LOG_DURATION_NOW(start);
 
+    STOPWATCH_TIME_NOW(start);
+    LOG("Checking for missing transitions");
     // Check for missing transitions (eg. not installed)
     QStringList transtions = getAssetsServiceIds(m_doc, QStringLiteral("transition"));
     for (const QString &id : qAsConst(transtions)) {
@@ -253,8 +272,11 @@ bool DocumentChecker::hasErrorInProject()
             m_items.push_back(item);
         }
     }
+    LOG_DURATION_NOW(start);
 
     // Check for missing filter assets
+    STOPWATCH_TIME_NOW(start);
+    LOG("Checking for missing filter assets");
     QStringList assetsToCheck = getAssetsFiles(m_doc, QStringLiteral("filter"), getAssetPairs());
     for (const QString &filterfile : qAsConst(assetsToCheck)) {
         QString filePath = ensureAbsolutePath(filterfile);
@@ -281,8 +303,11 @@ bool DocumentChecker::hasErrorInProject()
             m_items.push_back(item);
         }
     }
+    LOG_DURATION_NOW(start);
 
     // Check for missing effects (eg. not installed)
+    STOPWATCH_TIME_NOW(start);
+    LOG("Checking for missing effects");
     QStringList filters = getAssetsServiceIds(m_doc, QStringLiteral("filter"));
     for (const QString &id : qAsConst(filters)) {
         if (!EffectsRepository::get()->exists(id) && !itemsContain(MissingType::Effect, id, MissingStatus::Remove)) {
@@ -294,6 +319,7 @@ bool DocumentChecker::hasErrorInProject()
             m_items.push_back(item);
         }
     }
+    LOG_DURATION_NOW(start);
 
     if (m_items.size() == 0) {
         return false;

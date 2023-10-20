@@ -17,6 +17,7 @@ SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
 #include "kdenlivesettings.h"
 #include "lib/audio/audioStreamInfo.h"
 #include "profiles/profilemodel.hpp"
+#include "stopwatchmonitor.h"
 
 #include "core.h"
 #include "kdenlive_debug.h"
@@ -759,6 +760,9 @@ bool ClipController::hasAudio() const
 
 void ClipController::checkAudioVideo()
 {
+    DECL_STOPWATCH(start);
+    STOPWATCH_TIME_NOW(start);
+    LOG("Retrieving placeholder files")
     QReadLocker lock(&m_producerLock);
     if (m_masterProducer->get_int("_placeholder") == 1 || m_masterProducer->get_int("_missingsource") == 1) {
         // This is a placeholder file, try to guess from its properties
@@ -777,6 +781,10 @@ void ClipController::checkAudioVideo()
         }
         return;
     }
+    LOG_DURATION_NOW(start);
+
+    STOPWATCH_TIME_NOW(start);
+    LOG("Retrieving Clips")
     if (m_masterProducer->property_exists("kdenlive:clip_type")) {
         int clipType = m_masterProducer->get_int("kdenlive:clip_type");
         qDebug() << "------------\nFOUND PRESET CTYPE: " << clipType << "\n------------------------";
@@ -873,11 +881,14 @@ void ClipController::checkAudioVideo()
             m_masterProducer->set("kdenlive:clip_type", 2);
         }
     }
+    LOG_DURATION_NOW(start);
 }
+
 bool ClipController::hasVideo() const
 {
     return m_hasVideo;
 }
+
 PlaylistState::ClipState ClipController::defaultState() const
 {
     if (hasVideo()) {

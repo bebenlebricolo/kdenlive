@@ -137,7 +137,8 @@ ecm_add_app_icon(kdenlive ICONS ${ICONS_SRCS}) # icon name = variable name
 add_executable(kdenlive main.cpp ${kdenlive_extra_SRCS} ${kdenlive})
 target_include_directories(kdenlive
     PRIVATE ${CMAKE_BINARY_DIR}
-    )
+)
+
 target_include_directories(kdenlive
 	SYSTEM PRIVATE ${MLT_INCLUDE_DIR} ${MLTPP_INCLUDE_DIR})
 target_link_libraries(kdenlive kdenliveLib)
@@ -149,7 +150,9 @@ target_include_directories(kdenliveLib
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/external
     ${CMAKE_CURRENT_SOURCE_DIR}/lib
-    )
+    ${CMAKE_CURRENT_SOURCE_DIR}/utils
+)
+
 target_include_directories(kdenliveLib
 	SYSTEM  PRIVATE ${MLT_INCLUDE_DIR} ${MLTPP_INCLUDE_DIR})
 # Adds Qt definitions and include directories, and sets QT_LIBRARIES according
