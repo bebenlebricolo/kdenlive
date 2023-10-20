@@ -2179,6 +2179,7 @@ void Bin::slotDuplicateClip()
         }
         return true;
     };
+
     int ix = 0;
     QString lastId;
     for (const auto &item : qAsConst(items)) {

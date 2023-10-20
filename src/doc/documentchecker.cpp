@@ -136,7 +136,7 @@ bool DocumentChecker::hasErrorInProject()
     m_items.clear();
     DECL_STOPWATCH(start);
     STOPWATCH_TIME_NOW(start);
-    LOG("Starting project checking process - Playlist checks");
+    LOG_STW("Starting project checking process - Playlist checks");
 
     QString storageFolder;
     QDir projectDir(m_url.adjusted(QUrl::RemoveFilename).toLocalFile());
@@ -186,7 +186,7 @@ bool DocumentChecker::hasErrorInProject()
     QStringList verifiedPaths;
 
     STOPWATCH_TIME_NOW(start);
-    LOG("Validating document producers");
+    LOG_STW("Validating document producers");
     int max = documentProducers.count();
     for (int i = 0; i < max; ++i) {
         QDomElement e = documentProducers.item(i).toElement();
@@ -195,7 +195,7 @@ bool DocumentChecker::hasErrorInProject()
     LOG_DURATION_NOW(start);
 
     STOPWATCH_TIME_NOW(start);
-    LOG("Validating document chains");
+    LOG_STW("Validating document chains");
     max = documentChains.count();
     for (int i = 0; i < max; ++i) {
         QDomElement e = documentChains.item(i).toElement();
@@ -204,7 +204,7 @@ bool DocumentChecker::hasErrorInProject()
     LOG_DURATION_NOW(start);
 
     STOPWATCH_TIME_NOW(start);
-    LOG("Checking luma files");
+    LOG_STW("Checking luma files");
     // Check existence of luma files
     QStringList filesToCheck = getAssetsFiles(m_doc, QStringLiteral("transition"), getLumaPairs());
     for (const QString &lumafile : qAsConst(filesToCheck)) {
@@ -260,7 +260,7 @@ bool DocumentChecker::hasErrorInProject()
     LOG_DURATION_NOW(start);
 
     STOPWATCH_TIME_NOW(start);
-    LOG("Checking for missing transitions");
+    LOG_STW("Checking for missing transitions");
     // Check for missing transitions (eg. not installed)
     QStringList transtions = getAssetsServiceIds(m_doc, QStringLiteral("transition"));
     for (const QString &id : qAsConst(transtions)) {
@@ -276,7 +276,7 @@ bool DocumentChecker::hasErrorInProject()
 
     // Check for missing filter assets
     STOPWATCH_TIME_NOW(start);
-    LOG("Checking for missing filter assets");
+    LOG_STW("Checking for missing filter assets");
     QStringList assetsToCheck = getAssetsFiles(m_doc, QStringLiteral("filter"), getAssetPairs());
     for (const QString &filterfile : qAsConst(assetsToCheck)) {
         QString filePath = ensureAbsolutePath(filterfile);
@@ -307,7 +307,7 @@ bool DocumentChecker::hasErrorInProject()
 
     // Check for missing effects (eg. not installed)
     STOPWATCH_TIME_NOW(start);
-    LOG("Checking for missing effects");
+    LOG_STW("Checking for missing effects");
     QStringList filters = getAssetsServiceIds(m_doc, QStringLiteral("filter"));
     for (const QString &id : qAsConst(filters)) {
         if (!EffectsRepository::get()->exists(id) && !itemsContain(MissingType::Effect, id, MissingStatus::Remove)) {

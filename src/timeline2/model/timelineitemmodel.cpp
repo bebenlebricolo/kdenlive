@@ -734,7 +734,7 @@ void TimelineItemModel::buildTrackCompositing(bool rebuild)
 
     DECL_STOPWATCH(start);
     STOPWATCH_TIME_NOW(start);
-    LOG("Updating tracks")
+    LOG_STW("Updating tracks")
     int videoTracks = 0;
     int audioTracks = 0;
     while (it != m_allTracks.cend()) {
@@ -766,7 +766,11 @@ void TimelineItemModel::buildTrackCompositing(bool rebuild)
         ++it;
     }
     field->unlock();
+    LOG_DURATION_NOW(start);
+
     // Update sequence clip's AV status
+    STOPWATCH_TIME_NOW(start);
+    LOG_STW("Updating sequence clip's AV status");
     int currentClipType = m_tractor->get_int("kdenlive:clip_type");
     int newClipType = audioTracks > 0 ? (videoTracks > 0 ? 0 : 1) : 2;
     if (currentClipType != newClipType) {

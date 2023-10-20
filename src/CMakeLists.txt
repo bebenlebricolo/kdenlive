@@ -45,6 +45,13 @@ if(HAVE_LINUX_INPUT_H)
         jogshuttle/jogshuttleconfig.cpp)
 endif()
 
+# Globally enable PERF_LOGGING macros.
+option(USE_PERF_LOGGING "Enables performance logging/monitoring tools. Instrumentation code." ON)
+if(USE_PERF_LOGGING)
+    add_compile_definitions(PERF_LOGGING)
+    message(STATUS "[PERF_LOGGING] : Performance logging option activated, will compile with instrumented perf monitoring code.")
+endif()
+
 ### Find source files
 add_subdirectory(abstractmodel)
 add_subdirectory(assets)

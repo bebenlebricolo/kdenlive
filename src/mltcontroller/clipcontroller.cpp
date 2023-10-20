@@ -762,7 +762,7 @@ void ClipController::checkAudioVideo()
 {
     DECL_STOPWATCH(start);
     STOPWATCH_TIME_NOW(start);
-    LOG("Retrieving placeholder files")
+    LOG_STW("Retrieving placeholder files")
     QReadLocker lock(&m_producerLock);
     if (m_masterProducer->get_int("_placeholder") == 1 || m_masterProducer->get_int("_missingsource") == 1) {
         // This is a placeholder file, try to guess from its properties
@@ -784,7 +784,7 @@ void ClipController::checkAudioVideo()
     LOG_DURATION_NOW(start);
 
     STOPWATCH_TIME_NOW(start);
-    LOG("Retrieving Clips")
+    LOG_STW("Retrieving Clips")
     if (m_masterProducer->property_exists("kdenlive:clip_type")) {
         int clipType = m_masterProducer->get_int("kdenlive:clip_type");
         qDebug() << "------------\nFOUND PRESET CTYPE: " << clipType << "\n------------------------";

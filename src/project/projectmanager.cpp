@@ -21,6 +21,7 @@ SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
 #include "project/dialogs/projectsettings.h"
 #include "timeline2/model/timelinefunctions.hpp"
 #include "utils/qstringutils.h"
+#include "utils/stopwatchmonitor.h"
 #include "utils/thumbnailcache.hpp"
 #include "xml/xml.hpp"
 #include <audiomixer/mixermanager.hpp>
@@ -825,6 +826,9 @@ void ProjectManager::doOpenFile(const QUrl &url, KAutoSaveFile *stale, bool isBa
     pCore->bin()->setDocument(doc);
 
     // Set default target tracks to upper audio / lower video tracks
+    DECL_STOPWATCH(start);
+    STOPWATCH_TIME_NOW(start);
+    LOG_STW(("Opening project" + doc->objectName().toStdString()));
     m_project = doc;
     pCore->monitorManager()->projectMonitor()->locked = true;
     QDateTime documentDate = QFileInfo(m_project->url().toLocalFile()).lastModified();
@@ -839,10 +843,15 @@ void ProjectManager::doOpenFile(const QUrl &url, KAutoSaveFile *stale, bool isBa
         // Open default blank document
         pCore->monitorManager()->projectMonitor()->locked = false;
         newFile(false);
+
+        LOG_DURATION_NOW(start);
         return;
     }
+    LOG_DURATION_NOW(start);
 
     // Re-open active timelines
+    STOPWATCH_TIME_NOW(start);
+    LOG_STW("Reopening active timelines");
     QStringList openedTimelines = m_project->getDocumentProperty(QStringLiteral("opensequences")).split(QLatin1Char(';'), Qt::SkipEmptyParts);
     for (auto &uid : openedTimelines) {
         const QUuid uuid(uid);
@@ -851,12 +860,20 @@ void ProjectManager::doOpenFile(const QUrl &url, KAutoSaveFile *stale, bool isBa
             openTimeline(binId, uuid);
         }
     }
+    LOG_DURATION_NOW(start);
+
     // Now that sequence clips are fully built, fetch thumbnails
+    STOPWATCH_TIME_NOW(start);
+    LOG_STW("Fetch thumbnails");
     const QStringList sequenceIds = pCore->projectItemModel()->getAllSequenceClips().values();
     for (auto &id : sequenceIds) {
         ClipLoadTask::start(ObjectId(ObjectType::BinClip, id.toInt(), QUuid()), QDomElement(), true, -1, -1, this);
     }
+    LOG_DURATION_NOW(start);
+
     // Raise last active timeline
+    STOPWATCH_TIME_NOW(start);
+    LOG_STW("Retrieving timeline");
     QUuid activeUuid(m_project->getDocumentProperty(QStringLiteral("activetimeline")));
     if (activeUuid.isNull()) {
         activeUuid = m_project->uuid();
@@ -867,12 +884,18 @@ void ProjectManager::doOpenFile(const QUrl &url, KAutoSaveFile *stale, bool isBa
             if (pCore->projectItemModel()->sequenceCount() == 0) {
                 // Something is broken here, abort
                 abortLoading();
+                LOG_STW("Abort the mission!")
+                LOG_DURATION_NOW(start);
                 return;
             }
         } else {
             openTimeline(binId, activeUuid);
         }
     }
+    LOG_DURATION_NOW(start);
+
+    STOPWATCH_TIME_NOW(start);
+    LOG_STW("Load active sequence");
     pCore->window()->connectDocument();
     // Now load active sequence in project monitor
     pCore->monitorManager()->projectMonitor()->locked = false;
@@ -893,6 +916,8 @@ void ProjectManager::doOpenFile(const QUrl &url, KAutoSaveFile *stale, bool isBa
     pCore->projectItemModel()->missingClipTimer.start();
     delete m_progressDialog;
     m_progressDialog = nullptr;
+
+    LOG_DURATION_NOW(start);
 }
 
 void ProjectManager::slotRevert()

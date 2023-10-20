@@ -222,7 +222,7 @@ void ClipLoadTask::generateThumbnail(std::shared_ptr<ProjectClip> binClip, std::
         QImage thumb = ThumbnailCache::get()->getThumbnail(binClip->hashForThumbs(), QString::number(m_owner.itemId), frameNumber);
         if (!thumb.isNull()) {
             // Thumbnail found in cache
-            qDebug() << "=== FOUND THUMB IN CACHe";
+            qDebug() << "=== FOUND THUMB IN CACHE";
             QMetaObject::invokeMethod(binClip.get(), "setThumbnail", Qt::QueuedConnection, Q_ARG(QImage, thumb), Q_ARG(int, m_in), Q_ARG(int, m_out),
                                       Q_ARG(bool, true));
         } else {
